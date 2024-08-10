@@ -19,6 +19,8 @@ use crate::misc::AsF32;
 use std::f32::consts::PI;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Range, Sub, SubAssign};
 
+#[cfg(feature = "mint")]
+use mint;
 #[cfg(feature = "nalgebra_interop")]
 use nalgebra as na;
 #[cfg(feature = "with_serde")]
@@ -46,6 +48,25 @@ optional_serde_struct! {
     pub struct Vector2 {
         pub x: f32,
         pub y: f32,
+    }
+}
+
+#[cfg(feature = "mint")]
+impl mint::IntoMint for Vector2 {
+    type MintType = mint::Vector2<f32>;
+}
+
+#[cfg(feature = "mint")]
+impl From<mint::Vector2<f32>> for Vector2 {
+    fn from(v: mint::Vector2<f32>) -> Self {
+        Vector2 { x: v.x, y: v.y, }
+    }
+}
+
+#[cfg(feature = "mint")]
+impl From<Vector2> for mint::Vector2<f32> {
+    fn from(v: Vector2) -> Self {
+        mint::Vector2 { x: v.x, y: v.y }
     }
 }
 
@@ -395,6 +416,25 @@ optional_serde_struct! {
         pub x: f32,
         pub y: f32,
         pub z: f32,
+    }
+}
+
+#[cfg(feature = "mint")]
+impl mint::IntoMint for Vector3 {
+    type MintType = mint::Vector3<f32>;
+}
+
+#[cfg(feature = "mint")]
+impl From<mint::Vector3<f32>> for Vector3 {
+    fn from(v: mint::Vector3<f32>) -> Self {
+        Vector3 { x: v.x, y: v.y, z: v.z }
+    }
+}
+
+#[cfg(feature = "mint")]
+impl From<Vector3> for mint::Vector3<f32> {
+    fn from(value: Vector3) -> Self {
+        mint::Vector3 { x: value.x, y: value.y, z: value.z }
     }
 }
 
@@ -859,6 +899,25 @@ optional_serde_struct! {
 
 pub type Quaternion = Vector4;
 
+#[cfg(feature = "mint")]
+impl mint::IntoMint for Vector4 {
+    type MintType = mint::Vector4<f32>;
+}
+
+#[cfg(feature = "mint")]
+impl From<mint::Vector4<f32>> for Vector4 {
+    fn from(v: mint::Vector4<f32>) -> Self {
+        Vector4 { x: v.x, y: v.y, z: v.z, w: v.w }
+    }
+}
+
+#[cfg(feature = "mint")]
+impl From<Vector4> for mint::Vector4<f32> {
+    fn from(value: Vector4) -> Self {
+        mint::Vector4 { x: value.x, y: value.y, z: value.z, w: value.w }
+    }
+}
+
 #[cfg(feature = "nalgebra_interop")]
 impl From<na::Vector4<f32>> for Vector4 {
     fn from(v: na::Vector4<f32>) -> Vector4 {
@@ -1231,6 +1290,20 @@ impl Quaternion {
     }
 }
 
+#[cfg(feature = "mint")]
+impl From<mint::Quaternion<f32>> for Quaternion {
+    fn from(v: mint::Quaternion<f32>) -> Self {
+        Quaternion { x: v.v.x, y: v.v.y, z: v.v.z, w: v.s }
+    }
+}
+
+#[cfg(feature = "mint")]
+impl From<Quaternion> for mint::Quaternion<f32> {
+    fn from(value: Quaternion) -> Self {
+        mint::Quaternion { v: mint::Vector3 { x: value.x, y: value.y, z: value.z }, s: value.w }
+    }
+}
+
 #[cfg(feature = "nalgebra_interop")]
 impl From<na::geometry::Quaternion<f32>> for Quaternion {
     fn from(q: na::geometry::Quaternion<f32>) -> Quaternion {
@@ -1302,6 +1375,59 @@ optional_serde_struct! {
         pub m7: f32,
         pub m11: f32,
         pub m15: f32,
+    }
+}
+
+#[cfg(feature = "mint")]
+impl mint::IntoMint for Matrix {
+    type MintType = mint::ColumnMatrix4<f32>;
+}
+
+#[cfg(feature = "mint")]
+impl From<mint::ColumnMatrix4<f32>> for Matrix {
+    fn from(m: mint::ColumnMatrix4<f32>) -> Self {
+        Matrix {
+            m0: m.x.x, m4: m.x.y, m8: m.x.z, m12: m.x.w,
+            m1: m.y.x, m5: m.y.y, m9: m.y.z, m13: m.y.w,
+            m2: m.z.x, m6: m.z.y, m10: m.z.z, m14: m.z.w,
+            m3: m.w.x, m7: m.w.y, m11: m.w.z, m15: m.w.w,
+        }
+    }
+}
+
+#[cfg(feature = "mint")]
+impl From<Matrix> for mint::ColumnMatrix4<f32> {
+    fn from(value: Matrix) -> Self {
+        mint::ColumnMatrix4 {
+            x: mint::Vector4 { x: value.m0, y: value.m4, z: value.m8, w: value.m12 },
+            y: mint::Vector4 { x: value.m1, y: value.m5, z: value.m9, w: value.m13 },
+            z: mint::Vector4 { x: value.m2, y: value.m6, z: value.m10, w: value.m14 },
+            w: mint::Vector4 { x: value.m3, y: value.m7, z: value.m11, w: value.m15 },
+        }
+    }
+}
+
+#[cfg(feature = "mint")]
+impl From<mint::RowMatrix4<f32>> for Matrix {
+    fn from(m: mint::RowMatrix4<f32>) -> Self {
+        Matrix {
+            m0: m.x.x, m4: m.y.x, m8: m.z.x, m12: m.w.x,
+            m1: m.x.y, m5: m.y.y, m9: m.z.y, m13: m.w.y,
+            m2: m.x.z, m6: m.y.z, m10: m.z.z, m14: m.w.z,
+            m3: m.x.w, m7: m.y.w, m11: m.z.w, m15: m.w.w,
+        }
+    }
+}
+
+#[cfg(feature = "mint")]
+impl From<Matrix> for mint::RowMatrix4<f32> {
+    fn from(value: Matrix) -> Self {
+        mint::RowMatrix4 {
+            x: mint::Vector4 { x: value.m0, y: value.m1, z: value.m2, w: value.m3 },
+            y: mint::Vector4 { x: value.m4, y: value.m5, z: value.m6, w: value.m7 },
+            z: mint::Vector4 { x: value.m8, y: value.m9, z: value.m10, w: value.m11 },
+            w: mint::Vector4 { x: value.m12, y: value.m13, z: value.m14, w: value.m15 },
+        }
     }
 }
 
